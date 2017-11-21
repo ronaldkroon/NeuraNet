@@ -37,5 +37,24 @@ namespace NeuraNet
             previousLayer = previous;
             nextLayer = next;
         }
+
+        /// <summary>
+        /// Calculates the current layer's output values based on the specified <paramref name="inputs"/>, the current
+        /// <see cref="Weights"/> and <see cref="Biases"/> and the used <see cref="OutputActivation"/> algorithm.
+        /// The output is then passed on to the <see cref="nextLayer"/>. If there is no next layer the output values are
+        /// the output of the entire network.
+        /// </summary>
+        public Vector<double> FeedForward(double[] inputs)
+        {
+            return FeedForward(Vector<double>.Build.DenseOfArray(inputs));
+        }
+
+        private Vector<double> FeedForward(Vector<double> inputs)
+        {
+            Vector<double> z = (inputs * Weights) + Biases;
+            Vector<double> outputs = OutputActivation.Transform(z);
+
+            return (nextLayer != null) ? nextLayer.FeedForward(outputs) : outputs;
+        }
     }
 }
