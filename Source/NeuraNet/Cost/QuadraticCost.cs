@@ -11,7 +11,9 @@ namespace NeuraNet.Cost
         /// </summary>
         public double Calculate(Vector<double> output, Vector<double> target)
         {
-            return 0;
+            double Squared(double value) => (value * value);
+
+            return 0.5 * ((output - target).Map(Squared).Sum());
         }
     }
 }
