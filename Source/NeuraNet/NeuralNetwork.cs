@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using MathNet.Numerics.LinearAlgebra;
-
 using NeuraNet.Cost;
 using NeuraNet.NetworkLayout;
 
@@ -18,15 +18,24 @@ namespace NeuraNet
         private readonly Layer firstHiddenLayer;
         private readonly Layer outputLayer;
 
+        public ICostFunction CostFunction => costFunction;
+
+        public event EventHandler<ExampleTrainedEventArgs> ExampleTrained = delegate { };
+
         /// <summary>
         /// Instantiates a new neural network with the layout provided by the specified <paramref name="layoutProvider"/>.
         /// </summary>
         /// <param name="layoutProvider">Provides the layout of the network</param>
         public NeuralNetwork(INetworkLayoutProvider layoutProvider, ICostFunction costFunction)
+            : this(layoutProvider.GetLayers(), costFunction)
         {
-            layers = layoutProvider.GetLayers();
-            firstHiddenLayer = layers.First();
-            outputLayer = layers.Last();
+        }
+
+        public NeuralNetwork(IEnumerable<Layer> layers, ICostFunction costFunction)
+        {
+            this.layers = layers.ToArray();
+            firstHiddenLayer = this.layers.First();
+            outputLayer = this.layers.Last();
 
             this.costFunction = costFunction;
         }
@@ -75,12 +84,28 @@ namespace NeuraNet
                     costSumForAllExamples += Train(example.Input, example.ExpectedOutput, learningRate, momentum);
 
                     meanCost = costSumForAllExamples / currentExample;
+                    OnExampleTrained(epoch + 1, numberOfEpochs, currentExample, trainingExamples.Length, meanCost);
 
                     currentExample++;
                 }
             }
 
             return meanCost;
+        }
+
+        private void OnExampleTrained(
+            int currentEpoch, int totalNumberOfEpochs, int currentExample, int totalNumberOfExamples, double meanCost)
+        {
+            ExampleTrainedEventArgs arguments = new ExampleTrainedEventArgs
+            {
+                CurrentEpoch = currentEpoch,
+                TotalEpochCount = totalNumberOfEpochs,
+                CurrentExample = currentExample,
+                TotalExampleCount = totalNumberOfExamples,
+                MeanCost = meanCost,
+            };
+
+            ExampleTrained(this, arguments);
         }
 
         private double Train(double[] input, Vector<double> target, double learningRate, double momentum)
