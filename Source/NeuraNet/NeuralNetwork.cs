@@ -85,6 +85,8 @@ namespace NeuraNet
 
             outputLayer.BackPropagate(costFunction.Derivative(output, target));
 
+            firstHiddenLayer.PerformGradientDescent(learningRate);
+
             return costFunction.Calculate(output, target);
         }
     }
