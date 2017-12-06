@@ -5,5 +5,6 @@ namespace NeuraNet.Cost
     public interface ICostFunction
     {
         double Calculate(Vector<double> output, Vector<double> target);
+        Vector<double> Derivative(Vector<double> output, Vector<double> target);
     }
 }

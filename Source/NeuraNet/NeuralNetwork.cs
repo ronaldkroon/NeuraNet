@@ -82,6 +82,8 @@ namespace NeuraNet
         {
             Vector<double> output = firstHiddenLayer.FeedForward(input);
 
+            outputLayer.BackPropagate(costFunction.Derivative(output, target));
+
             return costFunction.Calculate(output, target);
         }
     }

@@ -14,6 +14,11 @@ namespace NeuraNet.Cost
             double Squared(double value) => (value * value);
 
             return 0.5 * ((output - target).Map(Squared).Sum());
+        } 
+        
+        public Vector<double> Derivative(Vector<double> output, Vector<double> target)
+        {
+            return output - target;
         }
     }
 }
